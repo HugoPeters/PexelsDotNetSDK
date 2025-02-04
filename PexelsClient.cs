@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
+
 namespace PexelsDotNetSDK.Api
 {
     /// <summary>
@@ -19,13 +20,12 @@ namespace PexelsDotNetSDK.Api
     /// </summary>
     public class PexelsClient
     {
-        private static HttpClient client;
-
         private static string _token = "";
         private static string _baseAddress = BaseConstants.API_URL;
         private static string _apiVersion = BaseConstants.API_URL_VERSION;
         private static int _timeoutSecs = BaseConstants.REQUEST_TIMEOUT_SECS;
         private static string _version = BaseConstants.VERSION;
+        private HttpClient client;
 
         private bool isValidColor(string color)
         {
@@ -43,22 +43,13 @@ namespace PexelsDotNetSDK.Api
             return BaseConstants.ORIENTATIONS.Contains(orientation.ToLower());
         }
 
-        public PexelsClient(string token)
+        public PexelsClient(string token, HttpClient client)
         {
             _token = token;
-            if (client == null)
-            {
-                this.CreateClient();
-            }
-            SetupClientAuthHeader(client);
+            this.client = client;
+            SetupClientDefaults(client);
         }
 
-        private HttpClient CreateClient()
-        {
-            client = new HttpClient();
-            SetupClientDefaults(client);
-            return client;
-        }
 
         protected virtual void SetupClientDefaults(HttpClient client)
         {
@@ -68,6 +59,7 @@ namespace PexelsDotNetSDK.Api
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("User-Agent", $"Pexels/.NET ({_version})");
+            SetupClientAuthHeader(client);
         }
 
         protected virtual void SetupClientAuthHeader(HttpClient client)
